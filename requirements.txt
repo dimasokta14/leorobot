@@ -16,7 +16,13 @@ pygame>=2.5.0
 pyaudio>=0.2.13
 
 # Vision (Phase 2)
-opencv-python-headless>=4.8.0
+# Belum ada wheel prebuilt di piwheels untuk Python 3.13/aarch64, jadi pip
+# akan compile dari source (~1GB+ ruang sementara) — berat & rawan bikin
+# "No space left on device" di Pi Zero 2W. Tidak ada modul Phase 1 yang
+# import cv2, jadi aman ditunda. Pas mulai Phase 2 (mata/), install lewat
+# apt dulu: `sudo apt install python3-opencv` (prebuilt, jauh lebih ringan)
+# baru uncomment baris ini kalau versi apt-nya kurang baru buat kebutuhanmu.
+# opencv-python-headless>=4.8.0 # uncomment Phase 2
 # face_recognition>=1.3.0 # uncomment Phase 2
 # picamera2>=0.3.0 # uncomment Phase 2
 
