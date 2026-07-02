@@ -18,12 +18,12 @@ class DisplayConfig:
 
     SPI_PORT: int = 0
     SPI_CS: int = 0  # GPIO8 (Pin 24)
-    DC_PIN: int = 24  # GPIO24 (Pin 18)
-    RST_PIN: int = 25  # GPIO25 (Pin 22)
-    BL_PIN: int = 18  # GPIO18 (Pin 12)
+    DC_PIN: int = 17  # GPIO17 (Pin 11)
+    RST_PIN: int = 22  # GPIO22 (Pin 15)
+    BL_PIN: int = 27  # GPIO27 (Pin 13)
     WIDTH: int = 240
     HEIGHT: int = 240
-    SPI_SPEED_HZ: int = 80_000_000
+    SPI_SPEED_HZ: int = 4_000_000
     ROTATION: int = 90
     FPS: int = 20
     BLINK_INTERVAL_MIN: float = 3.0  # detik
