@@ -5,10 +5,11 @@ dalam mode simulasi (thread idle, tidak crash) supaya main.py tetap
 bisa start.
 """
 
-import audioop
 import logging
 import threading
 from typing import Optional
+
+import numpy as np
 
 from config import MicConfig
 from nyawa.event_bus import Event, EventBus
@@ -89,8 +90,16 @@ class MicrophoneListener:
                 self._bus.publish(Event(type="CLAP_DETECTED", source="telinga.microphone"))
 
     def _detect_clap(self, chunk: bytes) -> bool:
-        """Internal: amplitude check terhadap CLAP_THRESHOLD."""
+        """Internal: amplitude check (RMS) terhadap CLAP_THRESHOLD.
+
+        Dulu pakai stdlib `audioop.rms()`, tapi modul itu dihapus total di
+        Python 3.13 (PEP 594) — dihitung manual pakai numpy sebagai
+        gantinya (PCM 16-bit signed, sama seperti pyaudio.paInt16).
+        """
         if not chunk:
             return False
-        amplitude = audioop.rms(chunk, 2)
-        return amplitude >= self._config.CLAP_THRESHOLD
+        samples = np.frombuffer(chunk, dtype=np.int16).astype(np.float64)
+        if samples.size == 0:
+            return False
+        rms = np.sqrt(np.mean(np.square(samples)))
+        return rms >= self._config.CLAP_THRESHOLD
