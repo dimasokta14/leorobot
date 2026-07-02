@@ -36,12 +36,22 @@ class SystemManager:
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
         GPIO.setup(SOFT_POWER_BUTTON_PIN, GPIO.IN, pull_up_down=GPIO.PUD_UP)
-        GPIO.add_event_detect(
-            SOFT_POWER_BUTTON_PIN,
-            GPIO.FALLING,
-            callback=self._on_power_button,
-            bouncetime=300,
-        )
+        try:
+            GPIO.add_event_detect(
+                SOFT_POWER_BUTTON_PIN,
+                GPIO.FALLING,
+                callback=self._on_power_button,
+                bouncetime=300,
+            )
+        except RuntimeError:
+            # Fitur opsional (tombol power fisik belum tentu terpasang).
+            # Edge detection bisa gagal karena permission/kernel GPIO
+            # interface — jangan sampai bikin seluruh robot gagal boot.
+            logger.warning(
+                "Gagal setup soft power button (GPIO%d) — fitur ini dilewati, "
+                "robot tetap jalan tanpa tombol power fisik",
+                SOFT_POWER_BUTTON_PIN,
+            )
         logger.info("GPIO initialized")
 
     def register_shutdown(self) -> None:

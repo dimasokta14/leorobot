@@ -26,7 +26,8 @@ class TouchSensor:
         cfg = config or MicConfig()
         self.HEAD_PIN = cfg.TOUCH_HEAD_PIN
         self.BODY_PIN = cfg.TOUCH_BODY_PIN
-        self._active = False
+        self._head_active = False
+        self._body_active = False
 
     def start(self) -> None:
         """GPIO interrupt setup + start listener."""
@@ -37,16 +38,31 @@ class TouchSensor:
         GPIO.setwarnings(False)
         GPIO.setup(self.HEAD_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
         GPIO.setup(self.BODY_PIN, GPIO.IN, pull_up_down=GPIO.PUD_DOWN)
-        GPIO.add_event_detect(self.HEAD_PIN, GPIO.RISING, callback=self._on_head, bouncetime=300)
-        GPIO.add_event_detect(self.BODY_PIN, GPIO.RISING, callback=self._on_body, bouncetime=300)
-        self._active = True
+        self._head_active = self._add_event_detect(self.HEAD_PIN, self._on_head, "HEAD")
+        self._body_active = self._add_event_detect(self.BODY_PIN, self._on_body, "BODY")
         logger.info("TouchSensor started (interrupt-based)")
 
+    def _add_event_detect(self, pin: int, callback, label: str) -> bool:
+        try:
+            GPIO.add_event_detect(pin, GPIO.RISING, callback=callback, bouncetime=300)
+            return True
+        except RuntimeError:
+            # Sensor belum tentu terpasang di fase development sekarang —
+            # jangan sampai bikin seluruh robot gagal boot.
+            logger.warning(
+                "Gagal setup edge detection touch %s (GPIO%d) — sensor ini dilewati",
+                label,
+                pin,
+            )
+            return False
+
     def stop(self) -> None:
-        if HAS_GPIO and self._active:
+        if HAS_GPIO and self._head_active:
             GPIO.remove_event_detect(self.HEAD_PIN)
+        if HAS_GPIO and self._body_active:
             GPIO.remove_event_detect(self.BODY_PIN)
-        self._active = False
+        self._head_active = False
+        self._body_active = False
 
     def _on_head(self, channel: int) -> None:
         logger.debug("Touch terdeteksi di HEAD")
