@@ -18,8 +18,8 @@ except ImportError:  # pragma: no cover - dev machine tanpa RPi.GPIO
 
 
 class TouchSensor:
-    HEAD_PIN = 17  # GPIO17 (Pin 11) — touch sensor 1
-    BODY_PIN = 27  # GPIO27 (Pin 13) — touch sensor 2
+    HEAD_PIN = 5  # GPIO5 (Pin 29) — touch sensor 1
+    BODY_PIN = 6  # GPIO6 (Pin 31) — touch sensor 2
 
     def __init__(self, event_bus: EventBus, config: Optional[MicConfig] = None):
         self._bus = event_bus

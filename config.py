@@ -43,8 +43,8 @@ class MicConfig:
     CLAP_THRESHOLD: int = 3000  # Amplitude threshold
     PROXIMITY_CM: float = 15.0  # Jarak 'terlalu dekat' (cm)
     PROXIMITY_POLL_SEC: float = 0.2  # cek jarak tiap 200ms
-    TOUCH_HEAD_PIN: int = 17  # GPIO BCM
-    TOUCH_BODY_PIN: int = 27
+    TOUCH_HEAD_PIN: int = 5  # GPIO BCM — dipindah dari 17 (bentrok dgn DisplayConfig.DC_PIN)
+    TOUCH_BODY_PIN: int = 6  # GPIO BCM — dipindah dari 27 (bentrok dgn DisplayConfig.BL_PIN)
     TRIG_PIN: int = 23  # HC-SR04 TRIG
     ECHO_PIN: int = 24  # HC-SR04 ECHO — wajib pakai voltage divider!
     WAKE_WORD: str = "hei leo"

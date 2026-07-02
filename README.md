@@ -99,6 +99,19 @@ Modul ST7789 1.3" 240x240 7-pin (tanpa CS pin), driver
 | DC | GPIO17 | Pin 11 |
 | BLK | GPIO27 | Pin 13 |
 
+## Wiring Sensor Lain
+
+| Komponen | Pin | BCM | Physical Pin |
+|---|---|---|---|
+| Touch sensor TTP223 — head | I/O | GPIO5 | Pin 29 |
+| Touch sensor TTP223 — body | I/O | GPIO6 | Pin 31 |
+| HC-SR04 — TRIG | TRIG | GPIO23 | Pin 16 |
+| HC-SR04 — ECHO | ECHO | GPIO24 | Pin 18 (**wajib voltage divider 5V→3.3V**) |
+
+Semua pin di atas sudah dicek tidak bentrok satu sama lain maupun dengan
+pin layar ST7789 di atas — kalau mengubah salah satu di `config.py`,
+cek ulang tidak ada GPIO yang dipakai dobel.
+
 ## Konfigurasi
 
 Semua parameter (pin GPIO, threshold, FPS, volume, dsb) ada di `config.py`
