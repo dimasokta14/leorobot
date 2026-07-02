@@ -1,5 +1,10 @@
 # Display
-st7789==0.0.4
+# Driver ST7789 dipakai dari https://github.com/pkkirilov/ST7789 (bukan
+# paket pimoroni "st7789" di PyPI) — cocok untuk modul 7-pin tanpa CS pin
+# yang dipasang di robot ini. Tidak ada rilis PyPI resmi, jadi divendor
+# manual ke venv oleh setup.sh (lihat fungsi install_st7789_driver).
+Adafruit-GPIO>=1.0.3
+spidev>=3.6
 Pillow>=10.0.0
 
 # GPIO

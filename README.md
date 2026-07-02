@@ -84,6 +84,21 @@ python -m unittest discover -s tests -v
 - **Tombol fisik**: soft power button di GPIO3 (BCM) memicu shutdown yang sama.
 - **Reboot**: `sudo systemctl restart emorobot` atau `sudo reboot`.
 
+## Wiring Layar ST7789
+
+Modul ST7789 1.3" 240x240 7-pin (tanpa CS pin), driver
+[pkkirilov/ST7789](https://github.com/pkkirilov/ST7789):
+
+| TFT Pin | Raspberry Pi (BCM) | Raspberry Pi (Physical Pin) |
+|---|---|---|
+| VCC | 3.3V | Pin 17 |
+| GND | GND | Pin 6 |
+| SCL / SCK | GPIO11 (SPI0 SCLK) | Pin 23 |
+| SDA / MOSI | GPIO10 (SPI0 MOSI) | Pin 19 |
+| RES / RST | GPIO22 | Pin 15 |
+| DC | GPIO17 | Pin 11 |
+| BLK | GPIO27 | Pin 13 |
+
 ## Konfigurasi
 
 Semua parameter (pin GPIO, threshold, FPS, volume, dsb) ada di `config.py`
@@ -95,8 +110,8 @@ robot cukup lewat `config.py`.
 
 | Gejala | Kemungkinan penyebab | Solusi |
 |---|---|---|
-| Layar tetap hitam | SPI belum aktif, atau wiring DC/RST/BL salah | Cek `raspi-config` → Interface Options → SPI aktif; cek pin di `DisplayConfig` |
-| Log muncul "mode simulasi" untuk display | Library `ST7789` tidak terpasang / hardware tidak terdeteksi | Robot tetap jalan (headless), pasang `pip install st7789` & cek wiring kalau butuh layar fisik |
+| Layar tetap hitam | SPI belum aktif, atau wiring DC/RST/BL salah | Cek `raspi-config` → Interface Options → SPI aktif; cocokkan wiring dengan tabel pin di bawah |
+| Log muncul "mode simulasi" untuk display | Driver ST7789 (pkkirilov) atau `Adafruit_GPIO` tidak terpasang / hardware tidak terdeteksi | Robot tetap jalan (headless); jalankan ulang `./setup.sh` supaya driver ter-vendor, atau cek wiring kalau butuh layar fisik |
 | Tidak ada suara sama sekali | PAM8406 belum terhubung, atau `pygame.mixer` gagal init | Cek `aplay -l`, cek volume ALSA (`alsamixer`), pastikan speaker tersambung sebelum boot |
 | TTS tidak bersuara | `espeak-ng` belum terpasang | `sudo apt install espeak-ng` |
 | Touch sensor tidak merespons | `RPi.GPIO` tidak terpasang, atau pull-down salah | Jalankan di Pi asli (bukan dev machine); cek wiring TTP223 ke pin 17/27 |

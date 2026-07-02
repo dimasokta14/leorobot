@@ -24,6 +24,17 @@ source venv/bin/activate
 pip install --upgrade pip
 pip install -r requirements.txt
 
+# Vendor driver ST7789 (github.com/pkkirilov/ST7789) — tidak ada di PyPI
+if [ ! -d vendor/ST7789_repo/ST7789 ]; then
+    echo "Meng-clone driver ST7789 (pkkirilov)..."
+    mkdir -p vendor
+    git clone --depth 1 https://github.com/pkkirilov/ST7789.git vendor/ST7789_repo
+else
+    echo "Driver ST7789 sudah ter-vendor, lewati clone."
+fi
+SITE_PACKAGES=$(python -c "import site; print(site.getsitepackages()[0])")
+echo "$(pwd)/vendor/ST7789_repo" > "$SITE_PACKAGES/st7789_vendor.pth"
+
 # Generate placeholder sound effect kalau belum ada
 python generate_sounds.py
 
