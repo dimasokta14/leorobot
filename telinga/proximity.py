@@ -65,6 +65,14 @@ class ProximitySensor:
             time.sleep(0.00001)
             GPIO.output(self._config.TRIG_PIN, False)
 
+            # Inisialisasi sebelum loop — kalau ECHO_PIN sudah dalam
+            # kondisi "salah" sejak awal (mis. sensor belum terpasang,
+            # pin floating terbaca HIGH terus), body while di bawah tidak
+            # pernah jalan sama sekali dan variabel ini tidak akan pernah
+            # ke-assign kalau tidak diberi nilai default dulu di sini.
+            pulse_start = time.time()
+            pulse_end = pulse_start
+
             timeout_at = time.time() + ECHO_TIMEOUT_SEC
             while GPIO.input(self._config.ECHO_PIN) == 0:
                 pulse_start = time.time()
@@ -84,11 +92,14 @@ class ProximitySensor:
 
     def _run(self) -> None:
         while self._running:
-            distance = self.read_distance_cm()
-            is_close = distance is not None and distance <= self._config.PROXIMITY_CM
-            if is_close and not self._was_close:
-                self._bus.publish(
-                    Event(type="OBJECT_CLOSE", data=distance, source="telinga.proximity")
-                )
-            self._was_close = is_close
+            try:
+                distance = self.read_distance_cm()
+                is_close = distance is not None and distance <= self._config.PROXIMITY_CM
+                if is_close and not self._was_close:
+                    self._bus.publish(
+                        Event(type="OBJECT_CLOSE", data=distance, source="telinga.proximity")
+                    )
+                self._was_close = is_close
+            except Exception:
+                logger.exception("Error membaca sensor proximity, lanjut ke pembacaan berikutnya")
             time.sleep(self._config.PROXIMITY_POLL_SEC)
