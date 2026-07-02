@@ -1,0 +1,16 @@
+[Unit]
+Description=EMO Robot Service
+After=network.target sound.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/emorobot
+ExecStart=/home/pi/emorobot/venv/bin/python main.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/var/log/emorobot/robot.log
+StandardError=append:/var/log/emorobot/error.log
+
+[Install]
+WantedBy=multi-user.target

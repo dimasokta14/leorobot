@@ -1,0 +1,117 @@
+# EMO Robot
+
+Mini robot ekspresif ala EMO, berjalan di Raspberry Pi Zero 2W. Wajah ditampilkan
+di layar ST7789 1.3", punya mood engine, merespons sentuhan/jarak/suara, dan
+bicara lewat text-to-speech offline.
+
+Dibangun sesuai `PRD_ClaudeCode_EMORobot.pdf` — Phase 1 (wajah, jiwa, telinga
+touch+proximity, mulut, nyawa) diimplementasikan penuh. Modul `mata/` (kamera
+& face recognition) dan `otak/` (AI chat) masih stub untuk Phase 2 & 3.
+
+## Arsitektur
+
+```
+~/emorobot/
+├── main.py              # Entry point utama
+├── config.py             # Semua konfigurasi terpusat (dataclass per modul)
+├── requirements.txt
+├── setup.sh              # Install otomatis, idempotent
+├── emorobot.service      # Systemd autostart
+├── generate_sounds.py    # Generate placeholder .wav via espeak-ng
+├── wajah/                # Display ST7789 + render ekspresi + animator
+├── jiwa/                 # Mood engine (state machine) + personality + events
+├── telinga/              # Input: touch, ultrasonik, mikrofon, wake word
+├── mulut/                # Output: speaker, sound effect, TTS
+├── mata/                 # Kamera + face detection/recognition (Phase 2, stub)
+├── otak/                 # AI chat + memory + edukasi (Phase 3, stub)
+├── nyawa/                # Event bus, logger, power, system lifecycle
+└── tests/                # Unit test per modul
+```
+
+Prinsip: setiap modul independen, komunikasi lewat `EventBus`
+(`threading.Queue`) di `nyawa/event_bus.py` — tidak ada import silang antar
+modul fungsional.
+
+## Instalasi (di Raspberry Pi)
+
+```bash
+git clone <repo-ini> ~/emorobot
+cd ~/emorobot
+./setup.sh
+```
+
+`setup.sh` idempotent — aman dijalankan berulang kali. Yang dilakukan:
+
+1. Install dependency sistem (`espeak-ng`, `portaudio19-dev`, dll)
+2. Aktifkan SPI (`raspi-config nonint do_spi 0`)
+3. Buat virtualenv `venv/` (kalau belum ada) & install `requirements.txt`
+4. Generate placeholder sound effect (`generate_sounds.py`)
+5. Buat `/var/log/emorobot/` dan pasang `emorobot.service` sebagai systemd
+   service (autostart saat boot)
+
+## Menjalankan
+
+Manual (tanpa systemd, untuk development):
+
+```bash
+source venv/bin/activate
+python main.py
+```
+
+Via systemd (setelah `setup.sh` + reboot, robot langsung jalan):
+
+```bash
+sudo systemctl start emorobot     # start manual
+sudo systemctl status emorobot    # cek status
+journalctl -u emorobot -f         # lihat log realtime
+```
+
+## Testing
+
+Semua modul bisa ditest tanpa hardware fisik (GPIO/SPI/mic di-mock atau
+otomatis fallback ke mode simulasi):
+
+```bash
+source venv/bin/activate
+python -m unittest discover -s tests -v
+```
+
+## Shutdown
+
+- **Software**: `sudo systemctl stop emorobot`, atau kirim `SIGTERM`/`SIGINT`
+  ke proses `main.py` — robot akan `graceful_shutdown()`: putar sound
+  `shutdown`, matikan speaker → animator → sensor telinga, baru GPIO cleanup.
+- **Tombol fisik**: soft power button di GPIO3 (BCM) memicu shutdown yang sama.
+- **Reboot**: `sudo systemctl restart emorobot` atau `sudo reboot`.
+
+## Konfigurasi
+
+Semua parameter (pin GPIO, threshold, FPS, volume, dsb) ada di `config.py`
+sebagai dataclass per modul (`DisplayConfig`, `MicConfig`, `AudioConfig`,
+`PowerConfig`, dst). Tidak ada nilai hardcode di file modul — ubah perilaku
+robot cukup lewat `config.py`.
+
+## Troubleshooting
+
+| Gejala | Kemungkinan penyebab | Solusi |
+|---|---|---|
+| Layar tetap hitam | SPI belum aktif, atau wiring DC/RST/BL salah | Cek `raspi-config` → Interface Options → SPI aktif; cek pin di `DisplayConfig` |
+| Log muncul "mode simulasi" untuk display | Library `ST7789` tidak terpasang / hardware tidak terdeteksi | Robot tetap jalan (headless), pasang `pip install st7789` & cek wiring kalau butuh layar fisik |
+| Tidak ada suara sama sekali | PAM8406 belum terhubung, atau `pygame.mixer` gagal init | Cek `aplay -l`, cek volume ALSA (`alsamixer`), pastikan speaker tersambung sebelum boot |
+| TTS tidak bersuara | `espeak-ng` belum terpasang | `sudo apt install espeak-ng` |
+| Touch sensor tidak merespons | `RPi.GPIO` tidak terpasang, atau pull-down salah | Jalankan di Pi asli (bukan dev machine); cek wiring TTP223 ke pin 17/27 |
+| Sensor ultrasonik ngaco / GPIO rusak | Lupa pasang voltage divider di pin ECHO | **Wajib** voltage divider 5V→3.3V di ECHO sebelum masuk GPIO |
+| `ModuleNotFoundError` saat `python main.py` | Virtualenv belum diaktifkan / dependency belum lengkap | `source venv/bin/activate && pip install -r requirements.txt` |
+| Service tidak autostart setelah reboot | Service belum di-enable | `sudo systemctl enable emorobot && sudo systemctl daemon-reload` |
+
+## Menambah Dependency
+
+Jangan install package di luar `requirements.txt` secara manual di
+Raspberry Pi. Kalau butuh package baru: tambahkan ke `requirements.txt`
+dengan komentar alasannya, lalu jalankan ulang `pip install -r requirements.txt`.
+
+## Roadmap
+
+- **Phase 1 (aktif)** — wajah, jiwa, telinga (touch + proximity), mulut, nyawa
+- **Phase 2** — `mata/`: face detection & recognition (OpenCV + dlib)
+- **Phase 3** — `otak/`: integrasi ChatGPT, memory percakapan, mode edukasi anak

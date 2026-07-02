@@ -1,0 +1,23 @@
+# Display
+st7789==0.0.4
+Pillow>=10.0.0
+
+# GPIO
+RPi.GPIO>=0.7.1
+gpiozero>=2.0
+
+# Audio
+pygame>=2.5.0
+pyaudio>=0.2.13
+
+# Vision (Phase 2)
+opencv-python-headless>=4.8.0
+# face_recognition>=1.3.0 # uncomment Phase 2
+# picamera2>=0.3.0 # uncomment Phase 2
+
+# AI (Phase 3)
+# openai>=1.0.0 # uncomment Phase 3
+
+# Utils
+numpy>=1.24.0
+dataclasses-json>=0.6.0
