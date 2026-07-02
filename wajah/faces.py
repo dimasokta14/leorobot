@@ -6,23 +6,55 @@ di Raspberry Pi Zero 2W.
 """
 
 import math
+import time
 
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageFont
 
 WIDTH = 240
 HEIGHT = 240
 BG_COLOR = (10, 10, 20)
 EYE_COLOR = (230, 240, 255)
 MOUTH_COLOR = (230, 240, 255)
+BOOT_TEXT = "LEO ROBOT"
 
 _EYE_L_CENTER = (80, 100)
 _EYE_R_CENTER = (160, 100)
 _EYE_RADIUS = 22
 _MOUTH_CENTER = (120, 165)
 
+# Font system umum di Raspberry Pi OS (paket fonts-dejavu-core / fonts-freefont-ttf).
+# Kalau tidak ada satupun, fallback ke bitmap font default PIL (tetap jalan, cuma kecil).
+_FONT_PATHS = (
+    "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+    "/usr/share/fonts/truetype/freefont/FreeSansBold.ttf",
+)
+_font_cache = {}
+
+
+def _font(size: int) -> ImageFont.FreeTypeFont:
+    if size in _font_cache:
+        return _font_cache[size]
+    for path in _FONT_PATHS:
+        try:
+            font = ImageFont.truetype(path, size)
+            break
+        except Exception:
+            continue
+    else:
+        font = ImageFont.load_default()
+    _font_cache[size] = font
+    return font
+
 
 def _canvas() -> Image.Image:
     return Image.new("RGB", (WIDTH, HEIGHT), BG_COLOR)
+
+
+def _draw_centered_text(draw: ImageDraw.ImageDraw, text: str, y: int, size: int = 22, fill=EYE_COLOR) -> None:
+    font = _font(size)
+    bbox = draw.textbbox((0, 0), text, font=font)
+    x = (WIDTH - (bbox[2] - bbox[0])) // 2
+    draw.text((x, y), text, fill=fill, font=font)
 
 
 def _draw_eyes(draw: ImageDraw.ImageDraw, blink: bool = False, squint: bool = False) -> None:
@@ -183,11 +215,16 @@ def face_talking(tick: int, intensity: float) -> Image.Image:
 
 
 def face_loading() -> Image.Image:
-    """Boot screen — dipanggil sebelum mood engine aktif."""
+    """Boot screen — dipanggil main.py sebelum mood engine aktif.
+
+    Jadi penanda visual robot sudah menyala & autostart berjalan.
+    Spinner dianimasikan lewat time.time() (bukan parameter tick) supaya
+    tetap kompatibel dipanggil berkali-kali dalam loop tanpa argumen.
+    """
     img = _canvas()
     draw = ImageDraw.Draw(img)
-    cx, cy = WIDTH // 2, HEIGHT // 2
-    draw.arc((cx - 30, cy - 30, cx + 30, cy + 30), 0, 270, fill=EYE_COLOR, width=6)
-    text = "EMO"
-    draw.text((cx - 18, cy + 40), text, fill=EYE_COLOR)
+    cx, cy = WIDTH // 2, HEIGHT // 2 - 20
+    angle = (time.time() * 220) % 360
+    draw.arc((cx - 30, cy - 30, cx + 30, cy + 30), angle, angle + 270, fill=EYE_COLOR, width=6)
+    _draw_centered_text(draw, BOOT_TEXT, cy + 50, size=22)
     return img

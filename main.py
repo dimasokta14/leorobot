@@ -2,6 +2,7 @@
 """EMO Robot — Main Entry Point"""
 
 import logging
+import time
 
 from config import Config
 from jiwa.events import EventHandler
@@ -15,8 +16,21 @@ from nyawa.system import SystemManager
 from telinga.microphone import MicrophoneListener
 from telinga.proximity import ProximitySensor
 from telinga.touch import TouchSensor
+from wajah import faces
 from wajah.animator import Animator
 from wajah.display import DisplayDriver
+
+BOOT_ANIMATION_SEC = 1.5
+BOOT_ANIMATION_FPS = 15
+
+
+def _play_boot_animation(display: DisplayDriver, duration: float = BOOT_ANIMATION_SEC) -> None:
+    """Tampilkan splash 'LEO ROBOT' berputar — penanda visual autostart berjalan."""
+    period = 1.0 / BOOT_ANIMATION_FPS
+    deadline = time.time() + duration
+    while time.time() < deadline:
+        display.show(faces.face_loading())
+        time.sleep(period)
 
 
 def main():
@@ -43,11 +57,13 @@ def main():
     # Start semua
     system.init_gpio()
     display.init()
+    display.show(faces.face_loading())  # feedback instan: layar nyala duluan
     speaker.init()
     touch.start()
     prox.start()
     mic.start()
     power.start()
+    _play_boot_animation(display)  # animasikan splash "LEO ROBOT" sebelum mood engine ambil alih
     anim.start()  # 20 FPS animation loop
     handler.start()  # Event processing loop
     speaker.play("startup")
