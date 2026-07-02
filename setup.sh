@@ -1,8 +1,8 @@
 #!/bin/bash
-# EMO Robot — Script install otomatis. Aman dijalankan berulang kali (idempotent).
+# LEO Robot — Script install otomatis. Aman dijalankan berulang kali (idempotent).
 set -e
 
-echo "=== EMO Robot Setup ==="
+echo "=== LEO Robot Setup ==="
 
 # System dependencies (apt install sudah idempotent secara default)
 sudo apt update
@@ -39,19 +39,19 @@ echo "$(pwd)/vendor/ST7789_repo" > "$SITE_PACKAGES/st7789_vendor.pth"
 python generate_sounds.py
 
 # Create log dir kalau belum ada
-if [ ! -d /var/log/emorobot ]; then
-    sudo mkdir -p /var/log/emorobot
-    sudo chown "$USER":"$USER" /var/log/emorobot
+if [ ! -d /var/log/leorobot ]; then
+    sudo mkdir -p /var/log/leorobot
+    sudo chown "$USER":"$USER" /var/log/leorobot
 fi
 
 # Install systemd service — copy ulang aman, service belum tentu enabled/aktif
-sudo cp emorobot.service /etc/systemd/system/emorobot.service
+sudo cp leorobot.service /etc/systemd/system/leorobot.service
 sudo systemctl daemon-reload
 
-if ! sudo systemctl is-enabled --quiet emorobot 2>/dev/null; then
-    sudo systemctl enable emorobot
+if ! sudo systemctl is-enabled --quiet leorobot 2>/dev/null; then
+    sudo systemctl enable leorobot
 else
-    echo "Service emorobot sudah enabled, lewati."
+    echo "Service leorobot sudah enabled, lewati."
 fi
 
 echo "=== Setup selesai! Reboot untuk autostart ==="

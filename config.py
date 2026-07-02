@@ -1,4 +1,4 @@
-"""EMO Robot — Konfigurasi terpusat.
+"""LEO Robot — Konfigurasi terpusat.
 
 Semua konfigurasi modul didefinisikan di sini sebagai dataclass.
 Tidak boleh ada nilai hardcode di file modul manapun — modul hanya
@@ -47,7 +47,7 @@ class MicConfig:
     TOUCH_BODY_PIN: int = 27
     TRIG_PIN: int = 23  # HC-SR04 TRIG
     ECHO_PIN: int = 24  # HC-SR04 ECHO — wajib pakai voltage divider!
-    WAKE_WORD: str = "hei emo"
+    WAKE_WORD: str = "hei leo"
 
 
 @dataclass
@@ -98,8 +98,8 @@ class Config:
     """Root config object — dipakai oleh main.py."""
 
     LOG_LEVEL: str = "INFO"
-    LOG_FILE: str = "/var/log/emorobot/robot.log"
-    ROBOT_NAME: str = "Emo"
+    LOG_FILE: str = "/var/log/leorobot/robot.log"
+    ROBOT_NAME: str = "Leo"
 
     display: DisplayConfig = field(default_factory=DisplayConfig)
     audio: AudioConfig = field(default_factory=AudioConfig)

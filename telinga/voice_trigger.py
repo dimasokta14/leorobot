@@ -1,4 +1,4 @@
-"""telinga/voice_trigger.py — Wake word detection ('Hei Emo').
+"""telinga/voice_trigger.py — Wake word detection ('Hei Leo').
 
 Status: Phase 1 — stub. Wake word engine offline (vosk/snowboy) belum
 diintegrasikan; struktur class dibuat sekarang supaya import tidak

@@ -16,7 +16,7 @@ from config import AudioConfig
 from mulut.sounds import SoundManager
 
 PHRASES = {
-    "startup": "Halo, aku Emo!",
+    "startup": "Halo, aku Leo!",
     "happy": "Yeay!",
     "sad": "Yah...",
     "curious": "Hmm?",

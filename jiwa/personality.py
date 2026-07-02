@@ -6,7 +6,7 @@ from typing import Dict, List
 
 @dataclass
 class Personality:
-    name: str = "Emo"
+    name: str = "Leo"
     character: str = "ceria, penasaran, dan hangat"
     preferred_responses: Dict[str, List[str]] = field(
         default_factory=lambda: {

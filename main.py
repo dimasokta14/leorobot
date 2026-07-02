@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""EMO Robot — Main Entry Point"""
+"""LEO Robot — Main Entry Point"""
 
 import logging
 import time
@@ -67,7 +67,7 @@ def main():
     anim.start()  # 20 FPS animation loop
     handler.start()  # Event processing loop
     speaker.play("startup")
-    logging.info("EMO Robot ready!")
+    logging.info("LEO Robot ready!")
     system.register_shutdown()
     handler.join()  # Block sampai shutdown
 

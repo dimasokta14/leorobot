@@ -12,7 +12,7 @@ from nyawa.event_bus import EventBus
 
 class TestSoundManager(unittest.TestCase):
     def setUp(self):
-        self.config = AudioConfig(SOUNDS_DIR="/tmp/emorobot_test_sounds")
+        self.config = AudioConfig(SOUNDS_DIR="/tmp/leorobot_test_sounds")
         self.manager = SoundManager(self.config)
 
     def test_all_required_sound_ids_present(self):
@@ -36,7 +36,7 @@ class TestSoundManager(unittest.TestCase):
 class TestSpeaker(unittest.TestCase):
     def test_init_degrades_gracefully_without_pygame(self):
         bus = EventBus()
-        speaker = Speaker(bus, AudioConfig(SOUNDS_DIR="/tmp/emorobot_test_sounds"))
+        speaker = Speaker(bus, AudioConfig(SOUNDS_DIR="/tmp/leorobot_test_sounds"))
         with patch.dict("sys.modules", {"pygame": None}):
             speaker.init()
         self.assertFalse(speaker.is_playing)
@@ -44,7 +44,7 @@ class TestSpeaker(unittest.TestCase):
 
     def test_play_does_not_raise_when_file_missing(self):
         bus = EventBus()
-        speaker = Speaker(bus, AudioConfig(SOUNDS_DIR="/tmp/emorobot_test_sounds"))
+        speaker = Speaker(bus, AudioConfig(SOUNDS_DIR="/tmp/leorobot_test_sounds"))
         speaker.init()
         speaker.play("happy")
         speaker.stop()

@@ -9,7 +9,7 @@ import os
 from logging.handlers import RotatingFileHandler
 from typing import Optional
 
-DEFAULT_LOG_FILE = "/var/log/emorobot/robot.log"
+DEFAULT_LOG_FILE = "/var/log/leorobot/robot.log"
 FALLBACK_LOG_FILE = os.path.join(
     os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "logs", "robot.log"
 )
@@ -20,7 +20,7 @@ def setup_logger(level: str = "INFO", log_file: Optional[str] = None) -> logging
     """Konfigurasi root logger dengan console handler + file handler.
 
     Kalau log_file tidak bisa ditulis (mis. jalan di dev machine tanpa
-    /var/log/emorobot), otomatis fallback ke ./logs/robot.log supaya
+    /var/log/leorobot), otomatis fallback ke ./logs/robot.log supaya
     robot tetap bisa start.
     """
     root = logging.getLogger()

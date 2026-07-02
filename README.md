@@ -1,6 +1,6 @@
-# EMO Robot
+# Leo Robot
 
-Mini robot ekspresif ala EMO, berjalan di Raspberry Pi Zero 2W. Wajah ditampilkan
+Mini robot ekspresif, berjalan di Raspberry Pi Zero 2W. Wajah ditampilkan
 di layar ST7789 1.3", punya mood engine, merespons sentuhan/jarak/suara, dan
 bicara lewat text-to-speech offline.
 
@@ -11,12 +11,12 @@ touch+proximity, mulut, nyawa) diimplementasikan penuh. Modul `mata/` (kamera
 ## Arsitektur
 
 ```
-~/emorobot/
+~/leorobot/
 ├── main.py              # Entry point utama
 ├── config.py             # Semua konfigurasi terpusat (dataclass per modul)
 ├── requirements.txt
 ├── setup.sh              # Install otomatis, idempotent
-├── emorobot.service      # Systemd autostart
+├── leorobot.service      # Systemd autostart
 ├── generate_sounds.py    # Generate placeholder .wav via espeak-ng
 ├── wajah/                # Display ST7789 + render ekspresi + animator
 ├── jiwa/                 # Mood engine (state machine) + personality + events
@@ -35,8 +35,8 @@ modul fungsional.
 ## Instalasi (di Raspberry Pi)
 
 ```bash
-git clone <repo-ini> ~/emorobot
-cd ~/emorobot
+git clone -b develop https://github.com/dimasokta14/leorobot.git ~/leorobot
+cd ~/leorobot
 ./setup.sh
 ```
 
@@ -46,7 +46,7 @@ cd ~/emorobot
 2. Aktifkan SPI (`raspi-config nonint do_spi 0`)
 3. Buat virtualenv `venv/` (kalau belum ada) & install `requirements.txt`
 4. Generate placeholder sound effect (`generate_sounds.py`)
-5. Buat `/var/log/emorobot/` dan pasang `emorobot.service` sebagai systemd
+5. Buat `/var/log/leorobot/` dan pasang `leorobot.service` sebagai systemd
    service (autostart saat boot)
 
 ## Menjalankan
@@ -61,9 +61,9 @@ python main.py
 Via systemd (setelah `setup.sh` + reboot, robot langsung jalan):
 
 ```bash
-sudo systemctl start emorobot     # start manual
-sudo systemctl status emorobot    # cek status
-journalctl -u emorobot -f         # lihat log realtime
+sudo systemctl start leorobot     # start manual
+sudo systemctl status leorobot    # cek status
+journalctl -u leorobot -f         # lihat log realtime
 ```
 
 ## Testing
@@ -78,11 +78,11 @@ python -m unittest discover -s tests -v
 
 ## Shutdown
 
-- **Software**: `sudo systemctl stop emorobot`, atau kirim `SIGTERM`/`SIGINT`
+- **Software**: `sudo systemctl stop leorobot`, atau kirim `SIGTERM`/`SIGINT`
   ke proses `main.py` — robot akan `graceful_shutdown()`: putar sound
   `shutdown`, matikan speaker → animator → sensor telinga, baru GPIO cleanup.
 - **Tombol fisik**: soft power button di GPIO3 (BCM) memicu shutdown yang sama.
-- **Reboot**: `sudo systemctl restart emorobot` atau `sudo reboot`.
+- **Reboot**: `sudo systemctl restart leorobot` atau `sudo reboot`.
 
 ## Wiring Layar ST7789
 
@@ -117,7 +117,7 @@ robot cukup lewat `config.py`.
 | Touch sensor tidak merespons | `RPi.GPIO` tidak terpasang, atau pull-down salah | Jalankan di Pi asli (bukan dev machine); cek wiring TTP223 ke pin 17/27 |
 | Sensor ultrasonik ngaco / GPIO rusak | Lupa pasang voltage divider di pin ECHO | **Wajib** voltage divider 5V→3.3V di ECHO sebelum masuk GPIO |
 | `ModuleNotFoundError` saat `python main.py` | Virtualenv belum diaktifkan / dependency belum lengkap | `source venv/bin/activate && pip install -r requirements.txt` |
-| Service tidak autostart setelah reboot | Service belum di-enable | `sudo systemctl enable emorobot && sudo systemctl daemon-reload` |
+| Service tidak autostart setelah reboot | Service belum di-enable | `sudo systemctl enable leorobot && sudo systemctl daemon-reload` |
 
 ## Menambah Dependency
 

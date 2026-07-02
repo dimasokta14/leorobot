@@ -43,9 +43,9 @@ class TestMoodEngine(unittest.TestCase):
 
 
 class TestPersonality(unittest.TestCase):
-    def test_default_name_is_emo(self):
+    def test_default_name_is_leo(self):
         p = Personality()
-        self.assertEqual(p.name, "Emo")
+        self.assertEqual(p.name, "Leo")
 
     def test_say_returns_non_empty_for_known_mood(self):
         p = Personality()

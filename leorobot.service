@@ -1,0 +1,16 @@
+[Unit]
+Description=LEO Robot Service
+After=network.target sound.target
+
+[Service]
+Type=simple
+User=pi
+WorkingDirectory=/home/pi/leorobot
+ExecStart=/home/pi/leorobot/venv/bin/python main.py
+Restart=on-failure
+RestartSec=5
+StandardOutput=append:/var/log/leorobot/robot.log
+StandardError=append:/var/log/leorobot/error.log
+
+[Install]
+WantedBy=multi-user.target
