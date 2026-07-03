@@ -124,13 +124,52 @@ robot cukup lewat `config.py`.
 | Gejala | Kemungkinan penyebab | Solusi |
 |---|---|---|
 | Layar tetap hitam | SPI belum aktif, atau wiring DC/RST/BL salah | Cek `raspi-config` → Interface Options → SPI aktif; cocokkan wiring dengan tabel pin di bawah |
-| Log muncul "mode simulasi" untuk display | Driver ST7789 (pkkirilov) atau `Adafruit_GPIO` tidak terpasang / hardware tidak terdeteksi | Robot tetap jalan (headless); jalankan ulang `./setup.sh` supaya driver ter-vendor, atau cek wiring kalau butuh layar fisik |
+| Log muncul "mode simulasi" untuk display, tapi tidak ada traceback jelas | Kemungkinan `try/except` di `wajah/display.py` menelan error asli (mis. konflik modul, lihat baris di bawah) | Test manual bypass try/except: lihat skrip diagnostic di bagian Troubleshooting Display di bawah |
+| `TypeError: ST7789.__init__() got an unexpected keyword argument 'spi'` atau muncul `DeprecationWarning: Using "import ST7789" is deprecated. Please "import st7789"` | Ada package **pimoroni `st7789`** (pip) yang bentrok nama modul dengan driver vendor **pkkirilov/ST7789** kita — biasa kejadian kalau venv lama (dari testing manual sebelum repo ini) dipakai ulang | `pip uninstall st7789 -y`, lalu pastikan `python3 -c "import ST7789; print(ST7789.__file__)"` menunjuk ke `vendor/ST7789_repo/ST7789/__init__.py`, bukan ke `site-packages` |
 | Tidak ada suara sama sekali | PAM8406 belum terhubung, atau `pygame.mixer` gagal init | Cek `aplay -l`, cek volume ALSA (`alsamixer`), pastikan speaker tersambung sebelum boot |
 | TTS tidak bersuara | `espeak-ng` belum terpasang | `sudo apt install espeak-ng` |
-| Touch sensor tidak merespons | `RPi.GPIO` tidak terpasang, atau pull-down salah | Jalankan di Pi asli (bukan dev machine); cek wiring TTP223 ke pin 17/27 |
+| Touch sensor tidak merespons | `RPi.GPIO` tidak terpasang, pull-down salah, atau `add_event_detect` gagal (lihat baris kernel GPIO di bawah) | Jalankan di Pi asli (bukan dev machine); cek wiring TTP223 ke pin GPIO5 (head) / GPIO6 (body) sesuai `config.py` |
+| `RuntimeError: Failed to add edge detection` di log (soft power button / touch sensor) | `RPi.GPIO` (library lama) tidak kompatibel dengan interface GPIO kernel baru di Raspberry Pi OS versi terkini — fitur terkait otomatis dilewati (lihat log warning), robot tetap jalan | Kalau touch sensor harus benar-benar berfungsi: `pip uninstall RPi.GPIO && pip install rpi-lgpio` (drop-in replacement, nama modul tetap `RPi.GPIO`, tidak perlu ubah kode) |
 | Sensor ultrasonik ngaco / GPIO rusak | Lupa pasang voltage divider di pin ECHO | **Wajib** voltage divider 5V→3.3V di ECHO sebelum masuk GPIO |
 | `ModuleNotFoundError` saat `python main.py` | Virtualenv belum diaktifkan / dependency belum lengkap | `source venv/bin/activate && pip install -r requirements.txt` |
+| Log aplikasi tidak ada di `/var/log/leorobot/robot.log` | Proses tidak punya permission tulis ke `/var/log/leorobot/`, logger otomatis fallback | Cek isi `~/leorobot/logs/robot.log` sebagai gantinya, atau perbaiki permission: `sudo chown $USER:$USER /var/log/leorobot` |
 | Service tidak autostart setelah reboot | Service belum di-enable | `sudo systemctl enable leorobot && sudo systemctl daemon-reload` |
+
+### Diagnostic Display (bypass try/except)
+
+`wajah/display.py` sengaja membungkus semua init SPI/ST7789 dengan
+`try/except` supaya robot tetap jalan (headless) kalau layar belum
+terpasang — konsekuensinya, error asli jadi tidak kelihatan, cuma log
+"mode simulasi". Kalau curiga ada masalah display tapi tidak yakin
+penyebabnya, jalankan langsung tanpa lapisan try/except itu:
+
+```bash
+sudo systemctl stop leorobot   # supaya tidak rebutan akses SPI
+cd ~/leorobot
+source venv/bin/activate
+python3 -c "
+import Adafruit_GPIO.SPI as SPI
+import ST7789
+from config import DisplayConfig
+from PIL import Image
+
+cfg = DisplayConfig()
+spi = SPI.SpiDev(cfg.SPI_PORT, cfg.SPI_CS, max_speed_hz=cfg.SPI_SPEED_HZ)
+disp = ST7789.ST7789(spi=spi, rst=cfg.RST_PIN, dc=cfg.DC_PIN, led=cfg.BL_PIN, width=cfg.WIDTH, height=cfg.HEIGHT)
+disp.begin()
+disp.clear()
+print('ST7789 init OK')
+
+img = Image.new('RGB', (240, 240), (255, 0, 0))
+disp.display(img)
+print('Frame merah dikirim ke layar — cek fisiknya sekarang!')
+"
+```
+
+Kalau layar berubah merah solid tanpa traceback, driver + wiring sudah
+benar — masalahnya ada di lapisan lain (main.py, service, dst). Kalau
+muncul traceback, itu error aslinya, jauh lebih mudah didiagnosa
+daripada cuma lihat "mode simulasi" di log.
 
 ## Menambah Dependency
 
