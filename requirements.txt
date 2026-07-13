@@ -33,6 +33,12 @@ pyaudio>=0.2.13
 # AI (Phase 3)
 # openai>=1.0.0 # uncomment Phase 3
 
+# Voice command prototype (voice_command_test.py — belum terintegrasi ke main.py)
+# yt-dlp buat resolve/cari lagu YouTube. STT-nya pakai whisper.cpp (bukan
+# paket pip) — di-build manual dari source, lihat README, karena Whisper
+# resmi (PyTorch) terlalu berat buat Pi Zero 2W.
+yt-dlp>=2024.1.0
+
 # Utils
 numpy>=1.24.0
 dataclasses-json>=0.6.0
